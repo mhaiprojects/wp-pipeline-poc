@@ -4,12 +4,22 @@
 set -euo pipefail
 
 # When this hook lives at $PIPELINE_ROOT/origin.git/hooks/post-receive,
-# two directories up is PIPELINE_ROOT. Override with PIPELINE_ROOT if needed.
+# two directories up is PIPELINE_ROOT. Override with PIPELINE_ROOT or
+# pipeline.ini if needed. Leave PIPELINE_ROOT unset here so
+# pipeline-common.sh can apply config-file values, then defaults.
 HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PIPELINE_ROOT="${PIPELINE_ROOT:-$(cd "$HOOK_DIR/../.." && pwd)}"
+_HOOK_ROOT_GUESS="${PIPELINE_ROOT:-$(cd "$HOOK_DIR/../.." && pwd)}"
+if [[ -f "$_HOOK_ROOT_GUESS/scripts/pipeline-common.sh" ]]; then
+  # shellcheck source=pipeline-common.sh
+  source "$_HOOK_ROOT_GUESS/scripts/pipeline-common.sh"
+else
+  PIPELINE_ROOT="$_HOOK_ROOT_GUESS"
+  PIPELINE_LOG_DIR="${PIPELINE_LOG_DIR:-$PIPELINE_ROOT/logs}"
+fi
 DEPLOY="$PIPELINE_ROOT/scripts/deploy-env.sh"
-LOG="$PIPELINE_ROOT/logs/post-receive.log"
-mkdir -p "$PIPELINE_ROOT/logs"
+PIPELINE_LOG_DIR="${PIPELINE_LOG_DIR:-$PIPELINE_ROOT/logs}"
+LOG="$PIPELINE_LOG_DIR/post-receive.log"
+mkdir -p "$PIPELINE_LOG_DIR"
 
 {
   echo "[$(date '+%Y-%m-%d %H:%M:%S %Z')] post-receive start"

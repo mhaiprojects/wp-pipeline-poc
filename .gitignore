@@ -39,3 +39,8 @@ wp-config-ddev.php
 .DS_Store
 *.swp
 *~
+
+# Local pipeline config (may contain secrets). The tracked example is
+# pipeline.ini.example; copy it to pipeline.ini and fill in values.
+/pipeline.ini
+/.env

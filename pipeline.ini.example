@@ -1,0 +1,66 @@
+# pipeline.ini.example
+# Copy this file to pipeline.ini in the repository root (or point
+# PIPELINE_CONFIG at another path) and edit the values for your machine:
+#
+#   cp pipeline.ini.example pipeline.ini
+#
+# pipeline.ini is gitignored and must not be committed — it may contain
+# secrets. This example uses placeholders such as changeme.
+#
+# Precedence: environment variables > this file > built-in defaults.
+# Leave a key empty, or omit it, to keep the built-in default.
+# Values are taken literally; they are not expanded or executed as shell.
+
+[pipeline]
+# Directory that contains wp-dev, wp-staging, wp-prod, origin.git, logs,
+# and backups. Default: the directory that contains scripts/ (this repo root).
+root=
+# Default: <root>/origin.git
+bare=
+# Default: <root>/logs
+log_dir=
+# Default: <root>/backups
+backup_dir=
+# Used by site-bootstrap commands if you export them; the current deploy
+# scripts do not read these. Do not commit a real password.
+admin_user=admin
+admin_password=changeme
+admin_email=admin@example.com
+
+[dev]
+# Default: <root>/wp-dev
+path=
+url=https://wp-dev.ddev.site
+# Placeholders for a non-DDEV or remote database. The current scripts use
+# `ddev` and do not read these keys yet.
+db_name=db
+db_user=db
+db_password=changeme
+db_host=db
+ssh_host=
+ssh_user=
+deploy_path=
+
+[staging]
+# Default: <root>/wp-staging
+path=
+url=https://wp-staging.ddev.site
+db_name=db
+db_user=db
+db_password=changeme
+db_host=db
+ssh_host=
+ssh_user=
+deploy_path=
+
+[prod]
+# Default: <root>/wp-prod
+path=
+url=https://wp-prod.ddev.site
+db_name=db
+db_user=db
+db_password=changeme
+db_host=db
+ssh_host=
+ssh_user=
+deploy_path=
