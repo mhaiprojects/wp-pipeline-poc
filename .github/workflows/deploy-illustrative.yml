@@ -1,0 +1,39 @@
+# This workflow is ILLUSTRATIVE only.
+# It does not deploy to any environment and is not part of the real pipeline.
+# Staging is deployed by hooks/post-receive when main is pushed to the
+# local bare remote. Production is deployed only by:
+#   scripts/deploy-prod.sh <tag>
+#
+# This file exists so a GitHub Actions user can see how a CI "deploy"
+# job might be labelled. It runs only when started by hand.
+name: Deploy (illustrative)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Which environment this example would target (not actually deployed)"
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - prod
+
+jobs:
+  illustrate:
+    name: Print the real deploy path (no deploy is performed)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain the real pipeline
+        run: |
+          echo "This is an illustrative workflow. No deploy ran."
+          echo "Requested example environment: ${{ inputs.environment }}"
+          echo
+          echo "Real flow:"
+          echo "  1. Merge a feature branch to main and push to the local bare remote."
+          echo "  2. hooks/post-receive deploys main to staging automatically."
+          echo "  3. Tag a release (vX.Y.Z) and push the tag."
+          echo "  4. Deploy production with: scripts/deploy-prod.sh vX.Y.Z"
+          echo "  5. Roll back production by redeploying an earlier tag, e.g.:"
+          echo "       scripts/deploy-prod.sh v0.1.0"
