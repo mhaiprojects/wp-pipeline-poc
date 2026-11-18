@@ -17,8 +17,8 @@ verify_one() {
   url="$(pipeline_site_url "$env")"
 
   echo "======== $env ($url) ========"
-  code="$(curl -sk -o /tmp/wp-pipeline-verify-$env.html -w '%{http_code}' "$url/")"
-  html="$(cat /tmp/wp-pipeline-verify-$env.html)"
+  code="$(curl -sk -o "/tmp/wp-pipeline-verify-${env}.html" -w '%{http_code}' "$url/")"
+  html="$(cat "/tmp/wp-pipeline-verify-${env}.html")"
   marker="$(printf '%s\n' "$html" | grep -o 'PIPELINE_DEMO[^<]*' | head -n 1 || true)"
   echo "HTTP $code"
   echo "Marker: ${marker:-<none>}"
