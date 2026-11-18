@@ -1,0 +1,10 @@
+# wp-pipeline PoC: track only custom plugin code.
+# WordPress core, uploads, DDEV config, and other plugins/themes stay untracked.
+/*
+!/.gitignore
+!/wp-content/
+/wp-content/*
+!/wp-content/plugins/
+/wp-content/plugins/*
+!/wp-content/plugins/pipeline-demo/
+!/wp-content/plugins/pipeline-demo/**
