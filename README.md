@@ -58,11 +58,12 @@ does not rewind the database.
 ```
 .
 ├── README.md
+├── pipeline.ini.example                # copy to pipeline.ini (gitignored)
 ├── docs/
 │   ├── wp-pipeline-poc-2026-11-19.md   # full write-up of the original run
 │   └── rollback.md                     # verified prod rollback to v0.1.0
 ├── scripts/
-│   ├── pipeline-common.sh              # PIPELINE_ROOT, URLs, helpers
+│   ├── pipeline-common.sh              # config loader, PIPELINE_ROOT, URLs, helpers
 │   ├── deploy-env.sh                   # deploy a git ref to staging or prod
 │   ├── deploy-prod.sh                  # deploy a vX.Y.Z tag to production
 │   ├── promote-db.sh                   # export, import, wp search-replace
@@ -150,6 +151,89 @@ cd "$PIPELINE_ROOT/wp-dev" && ddev start     # or ddev stop
 cd "$PIPELINE_ROOT/wp-staging" && ddev start
 cd "$PIPELINE_ROOT/wp-prod" && ddev start
 ```
+
+## Configuration
+
+The scripts in `scripts/` load optional local settings from `pipeline.ini`
+so you can point the pipeline at different directories, URLs, or (later)
+remote hosts without editing the scripts. Copy the tracked example and
+edit the copy:
+
+```bash
+cp pipeline.ini.example pipeline.ini
+# edit pipeline.ini — fill in paths and URLs for your machine
+```
+
+`pipeline.ini` is gitignored. Never commit real passwords, SSH hosts with
+credentials, or database dumps. The example uses placeholders such as
+`changeme`.
+
+### Where the file is read
+
+`scripts/pipeline-common.sh` looks for:
+
+1. The file named by `$PIPELINE_CONFIG`, if you set that environment
+   variable to a path, otherwise
+2. `$PIPELINE_ROOT/pipeline.ini` (the repository root, when
+   `PIPELINE_ROOT` is unset)
+
+If that file is missing and you did not set `PIPELINE_CONFIG`, the
+scripts also accept a `.env` file in the same directory, using
+`KEY=VALUE` lines (for example `STAGING_URL=https://...`). `.env` is
+gitignored too.
+
+If neither file is present, built-in defaults are used — the same paths
+and `https://wp-<env>.ddev.site` URLs this PoC originally ran with.
+
+### Precedence
+
+1. Environment variables already set in your shell (for example
+   `export STAGING_URL=...`). An empty-but-set variable still wins.
+2. Values in `pipeline.ini` (or `.env`)
+3. Built-in defaults in `pipeline-common.sh`
+
+### Format
+
+`pipeline.ini` is a simple INI file. Values are assigned literally; they
+are not executed as shell and are not expanded (`$HOME` is not
+substituted). Leave a key blank, or omit it, to keep the built-in
+default.
+
+| Section / key | Variable | Built-in default |
+|---|---|---|
+| `[pipeline] root` | `PIPELINE_ROOT` | directory containing `scripts/` |
+| `[pipeline] bare` | `PIPELINE_BARE` | `$PIPELINE_ROOT/origin.git` |
+| `[pipeline] log_dir` | `PIPELINE_LOG_DIR` | `$PIPELINE_ROOT/logs` |
+| `[pipeline] backup_dir` | `PIPELINE_BACKUP_DIR` | `$PIPELINE_ROOT/backups` |
+| `[pipeline] admin_user` | `WP_ADMIN_USER` | (empty) |
+| `[pipeline] admin_password` | `WP_ADMIN_PASS` | (empty) |
+| `[pipeline] admin_email` | `WP_ADMIN_EMAIL` | (empty) |
+| `[dev] path` | `DEV_PATH` | `$PIPELINE_ROOT/wp-dev` |
+| `[dev] url` | `DEV_URL` | `https://wp-dev.ddev.site` |
+| `[dev] db_name` | `DEV_DB_NAME` | (empty) |
+| `[dev] db_user` | `DEV_DB_USER` | (empty) |
+| `[dev] db_password` | `DEV_DB_PASSWORD` | (empty) |
+| `[dev] db_host` | `DEV_DB_HOST` | (empty) |
+| `[dev] ssh_host` | `DEV_SSH_HOST` | (empty) |
+| `[dev] ssh_user` | `DEV_SSH_USER` | (empty) |
+| `[dev] deploy_path` | `DEV_DEPLOY_PATH` | (empty) |
+| `[staging] path` | `STAGING_PATH` | `$PIPELINE_ROOT/wp-staging` |
+| `[staging] url` | `STAGING_URL` | `https://wp-staging.ddev.site` |
+| `[staging] db_*` / `ssh_*` / `deploy_path` | `STAGING_DB_*`, `STAGING_SSH_*`, `STAGING_DEPLOY_PATH` | (empty) |
+| `[prod] path` | `PROD_PATH` | `$PIPELINE_ROOT/wp-prod` |
+| `[prod] url` | `PROD_URL` | `https://wp-prod.ddev.site` |
+| `[prod] db_*` / `ssh_*` / `deploy_path` | `PROD_DB_*`, `PROD_SSH_*`, `PROD_DEPLOY_PATH` | (empty) |
+
+A `.env` file uses the variable names in the second column directly:
+
+```
+STAGING_URL=https://staging.example.com
+PIPELINE_LOG_DIR=/var/log/wp-pipeline
+```
+
+Database, SSH, deploy-path, and `admin_*` keys are placeholders for a
+non-DDEV or remote setup. The current deploy, promote, and verify
+scripts talk to local DDEV projects and do not use those keys yet.
 
 ## Code flow
 
@@ -284,6 +368,7 @@ git clone https://github.com/mhaiprojects/wp-pipeline-poc.git
 cd wp-pipeline-poc
 export PIPELINE_ROOT="$PWD"
 export WP_ADMIN_PASS  # set your own password; do not commit it
+cp pipeline.ini.example pipeline.ini   # optional; edit if your paths or URLs differ
 ```
 
 1. **Create a local bare remote** so the post-receive hook can run.
@@ -398,9 +483,14 @@ in the [write-up](docs/wp-pipeline-poc-2026-11-19.md):
 | `scripts/verify.sh [env\|all] [expected-release]` | Confirm banners and plugin state |
 | `hooks/post-receive` | Auto-deploy `main` to staging |
 
-Override paths with `PIPELINE_ROOT`, `PIPELINE_BARE`, `PIPELINE_LOG_DIR`,
-and `PIPELINE_BACKUP_DIR`. By default `PIPELINE_ROOT` is the directory
-that contains `scripts/` (this repository root).
+Override paths and URLs with `pipeline.ini` (see
+[Configuration](#configuration)), or with environment variables such as
+`PIPELINE_ROOT`, `PIPELINE_BARE`, `PIPELINE_LOG_DIR`,
+`PIPELINE_BACKUP_DIR`, `DEV_PATH`, `STAGING_PATH`, `PROD_PATH`,
+`DEV_URL`, `STAGING_URL`, and `PROD_URL`. Environment variables win
+over the config file, which wins over the built-in defaults. By default
+`PIPELINE_ROOT` is the directory that contains `scripts/` (this
+repository root).
 
 ## What is not in this repository
 
