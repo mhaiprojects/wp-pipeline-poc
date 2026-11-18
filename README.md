@@ -1,5 +1,8 @@
 # wp-pipeline-poc
 
+[![Lint](https://github.com/mhaiprojects/wp-pipeline-poc/actions/workflows/lint.yml/badge.svg)](https://github.com/mhaiprojects/wp-pipeline-poc/actions/workflows/lint.yml)
+[![Last commit](https://img.shields.io/github/last-commit/mhaiprojects/wp-pipeline-poc)](https://github.com/mhaiprojects/wp-pipeline-poc/commits/main)
+
 A local proof of concept for a **WordPress dev → staging → production**
 pipeline, using three separate [DDEV](https://ddev.com/) sites and git.
 
