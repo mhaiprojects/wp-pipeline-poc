@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Pipeline Demo
  * Description: Visible marker plugin for the local DDEV dev/staging/production pipeline proof of concept.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Author: mhaiprojects
  * License: GPL-2.0-or-later
  */
@@ -11,8 +11,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PIPELINE_DEMO_VERSION', '0.1.0');
-define('PIPELINE_DEMO_RELEASE', 'v0.1.0');
+define('PIPELINE_DEMO_VERSION', '0.2.0');
+define('PIPELINE_DEMO_RELEASE', 'v0.2.0');
 
 /**
  * Print a single visible banner so curl and a browser can confirm which
@@ -29,14 +29,14 @@ function pipeline_demo_render_marker() {
     $release = defined('PIPELINE_DEMO_RELEASE') ? PIPELINE_DEMO_RELEASE : 'unknown';
     $home    = home_url();
     $label   = sprintf(
-        'PIPELINE_DEMO %s (plugin %s) on %s',
+        'PIPELINE_DEMO %s (plugin %s) on %s — wave 2 banner',
         $release,
         $version,
         $home
     );
 
     printf(
-        '<div id="pipeline-demo-marker" data-pipeline-release="%s" data-pipeline-version="%s" style="position:relative;z-index:99999;margin:0;padding:12px 16px;background:#1b4d3e;color:#fff;font:600 16px/1.4 sans-serif;text-align:center;">%s</div>',
+        '<div id="pipeline-demo-marker" data-pipeline-release="%s" data-pipeline-version="%s" style="position:relative;z-index:99999;margin:0;padding:12px 16px;background:#7a1f1f;color:#fff;font:600 16px/1.4 sans-serif;text-align:center;">%s</div>',
         esc_attr($release),
         esc_attr($version),
         esc_html($label)
