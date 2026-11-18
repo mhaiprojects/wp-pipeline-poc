@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Installed as origin.git/hooks/post-receive
+# When main is updated, deploy the new tip into wp-staging and activate the plugin.
+set -euo pipefail
+
+# When this hook lives at $PIPELINE_ROOT/origin.git/hooks/post-receive,
+# two directories up is PIPELINE_ROOT. Override with PIPELINE_ROOT if needed.
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PIPELINE_ROOT="${PIPELINE_ROOT:-$(cd "$HOOK_DIR/../.." && pwd)}"
+DEPLOY="$PIPELINE_ROOT/scripts/deploy-env.sh"
+LOG="$PIPELINE_ROOT/logs/post-receive.log"
+mkdir -p "$PIPELINE_ROOT/logs"
+
+{
+  echo "[$(date '+%Y-%m-%d %H:%M:%S %Z')] post-receive start"
+  echo "  PIPELINE_ROOT=$PIPELINE_ROOT"
+  deployed=0
+  while read -r oldrev newrev refname; do
+    echo "  ref $refname $oldrev -> $newrev"
+    if [[ "$refname" == "refs/heads/main" ]]; then
+      echo "  main updated; deploying to staging"
+      env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE "$DEPLOY" staging main
+      deployed=1
+    else
+      echo "  skipping non-main ref $refname"
+    fi
+  done
+  if [[ "$deployed" -eq 0 ]]; then
+    echo "  no main update in this push; staging left unchanged"
+  fi
+  echo "[$(date '+%Y-%m-%d %H:%M:%S %Z')] post-receive end"
+} >>"$LOG" 2>&1
