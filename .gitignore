@@ -1,10 +1,41 @@
-# wp-pipeline PoC: track only custom plugin code.
-# WordPress core, uploads, DDEV config, and other plugins/themes stay untracked.
-/*
-!/.gitignore
-!/wp-content/
-/wp-content/*
-!/wp-content/plugins/
+# wp-pipeline-poc
+# The original plugin-only working tree ignored everything except
+# wp-content/plugins/pipeline-demo. This checkout is also a public
+# showcase, so docs, scripts, hooks, sample DDEV configs, and
+# GitHub Actions are tracked too.
+
+# Local DDEV site trees and the hook remote, if this clone is used
+# as PIPELINE_ROOT
+/wp-dev/
+/wp-staging/
+/wp-prod/
+/origin.git/
+/logs/
+/backups/
+*.sql
+*.sql.gz
+
+# WordPress core and runtime (never commit these)
+wp-config.php
+wp-config-ddev.php
+/wp-admin/
+/wp-includes/
+/index.php
+/xmlrpc.php
+/license.txt
+/license.md
+/readme.html
+/wp-*.php
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/cache/
+/wp-content/themes/
 /wp-content/plugins/*
 !/wp-content/plugins/pipeline-demo/
 !/wp-content/plugins/pipeline-demo/**
+/wp-content/.pipeline-deployed-*
+
+# OS / editor
+.DS_Store
+*.swp
+*~
