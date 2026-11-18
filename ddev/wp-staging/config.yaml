@@ -1,0 +1,19 @@
+# Sample DDEV config for the wp-staging environment of the wp-pipeline PoC.
+# This is a sanitized copy of the settings used on 19 November 2026.
+# Generated Docker Compose files and database dumps are intentionally omitted.
+#
+# To recreate the site, either copy this file to <site>/.ddev/config.yaml
+# or run the `ddev config` command from the README (preferred).
+name: wp-staging
+type: wordpress
+docroot: .
+php_version: "8.4"
+webserver_type: nginx-fpm
+xdebug_enabled: false
+database:
+  type: mariadb
+  version: "11.8"
+use_dns_when_possible: true
+timezone: Australia/Melbourne
+composer_version: "2"
+corepack_enable: false
